@@ -14,18 +14,6 @@ app.use(cors());
 app.use(helmet());
 app.use(helmet.hidePoweredBy({ setTo: 'PHP 4.2.0' }));
 app.use(validateBearerToken);
-app.use((error, req, res, next) => {
-  let response;
-  if (process.env.NODE_ENV === 'production') {
-    response = { error: { message: 'Server error' }}
-  } else {
-    response = { error }
-  }
-  res.status(500).json(response);
-});
-
-
-
 
 app.get("/movie", handleGetMovies)
 
@@ -71,5 +59,15 @@ function validateBearerToken(req, res, next) {
   };
   next();
 };
+
+app.use((error, req, res, next) => {
+  let response;
+  if (process.env.NODE_ENV === 'production') {
+    response = { error: { message: 'Server error' }}
+  } else {
+    response = { error }
+  }
+  res.status(500).json(response);
+});
 
 module.exports = app;
