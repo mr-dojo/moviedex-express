@@ -20,7 +20,7 @@ describe("moviedex app", () => {
       .get("/movie")
       .query({ genre: "ERROR" })
       .set(auth)
-      .expect(400, { error: { message: "query peramiter didn't didnt match any movies"}});
+      .expect(401, { error: { message: "query peramiter didn't didnt match any movies"}});
   });
   it("Returns a list of Dramas", () => {
     return supertest(app)

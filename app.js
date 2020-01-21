@@ -35,10 +35,9 @@ function handleGetMovies(req, res) {
   let result = MOVIES;
 
   if(genre) {
-    result = result.filter(movie => {
+  }; result = result.filter(movie => {
         return movie.genre.toLowerCase().includes(genre.toLowerCase());
     });
-  };
 
   if(country) {
     result = result.filter(movie => {
@@ -58,7 +57,7 @@ function handleGetMovies(req, res) {
   };
 
   if(!result[0]) {
-    return res.status(400).send({ error: { message: "query peramiter didn't didnt match any movies"}});
+    return res.status(401).send({ error: { message: "query peramiter didn't didnt match any movies"}});
   };
   
   res.status(200).send(result);
