@@ -6,13 +6,26 @@ const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
-const PORT = 8000
+const morganSetting = process.env.NODE_ENV === "production" ? "tiny" : "dev";
 
-app.use(morgan("dev"));
+
+app.use(morgan(morganSetting));
 app.use(cors());
 app.use(helmet());
 app.use(helmet.hidePoweredBy({ setTo: 'PHP 4.2.0' }));
 app.use(validateBearerToken);
+app.use((error, req, res, next) => {
+  let response;
+  if (process.env.NODE_ENV === 'production') {
+    response = { error: { message: 'Server error' }}
+  } else {
+    response = { error }
+  }
+  res.status(500).json(response);
+});
+
+
+
 
 app.get("/movie", handleGetMovies)
 
@@ -34,22 +47,30 @@ function handleGetMovies(req, res) {
   };
 
   if(avg_vote) {
-    result = result.filter(movie => {
-        return movie.avg_vote >= avg_vote;
-    });
+    const numVote = parseInt(avg_vote);
+    if(isNaN(numVote)) {
+      return res.send(400)
+    } else {
+      result = result.filter(movie => {
+        return movie.avg_vote >= numVote;
+      });
+    }; 
   };
 
+  if(!result[0]) {
+    return res.status(400).send({ error: { message: "query peramiter didn't didnt match any movies"}});
+  };
+  
   res.status(200).send(result);
 };
 
 function validateBearerToken(req, res, next) {
   const userKey = req.get('Authorization');
   const API_KEY = process.env.API_KEY
-  console.log(API_KEY, userKey.split(" ")[1])
   if (!userKey || userKey.split(" ")[1] !== API_KEY) {
     return res.status(401).json({ "error": "Unauthorized requrest" })
   };
   next();
 };
 
-app.listen(PORT, () => console.log(`Started listening on port http://localhost:${PORT}`));
+module.exports = app;
